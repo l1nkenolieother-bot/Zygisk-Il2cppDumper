@@ -9,8 +9,18 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-      - uses: android-actions/setup-android@v3
-      - run: chmod +x gradlew && ./gradlew :module:assembleRelease
+      - name: Setup Android SDK
+        run: |
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip -d android-sdk
+          echo "ANDROID_HOME=$GITHUB_WORKSPACE/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$GITHUB_WORKSPACE/android-sdk/cmdline-tools/bin:$PATH" >> $GITHUB_ENV
+      - name: Accept licenses
+        run: yes | sdkmanager --licenses --sdk_root=$ANDROID_HOME
+      - name: Build
+        run: |
+          chmod +x gradlew
+          ./gradlew :module:assembleRelease
       - uses: actions/upload-artifact@v4
         with:
           name: module
